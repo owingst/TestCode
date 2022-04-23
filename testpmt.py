@@ -15,28 +15,44 @@ import sys
 import datetime
 import requests
 from _datetime import timedelta
+from matplotlib import pyplot as plt
 
 
 def getPMTData():
 
+    dataArray = []
+
     now = datetime.datetime.now()
     dt = datetime.datetime.now() - datetime.timedelta(hours = 8)
-
-    print("now is {}\n".format(now))
-    print("dt is {}\n".format(dt))
 
     r = requests.get("http://192.168.1.74:5000/getPMTDataByDate", params={'start': dt, 'end': now})
 
     if (r.status_code == 200):
 
-        print("main: request was successful!")
-        #print("r.json is {}\n".format(r.json()))
-        data = r.json()
-        for x in data:
-            print("x is {}\n".format(x))
-        
+        print("getPMTData: request was successful!\n")
+        resp = r.json()
+
+        for x in resp:
+           dataArray.append(json.loads(x))
+
+        x = []
+        y = []
+        for i in dataArray:
+            y.append(i['pm25'])
+            val = i['ts']            
+            x.append(datetime.datetime.strptime(val, '%Y-%m-%d %H:%M:%S'))
+
+
+        plt.title('PMT Data')
+        plt.ylabel('Y axis')
+        plt.xlabel('X axis')
+        plt.plot(x, y, 'b', label='PM 25', linewidth=2)
+        #plt.grid(False,color='k')
+        plt.show()
+
     else:
-        print("main: Request Failed! status code {}".format(r.status_code))  
+        print("main: Request Failed! status code {}".format(r.status_code))
+
 
 def main():
     
