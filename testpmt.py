@@ -18,68 +18,77 @@ import requests
 from _datetime import timedelta
 from matplotlib import pyplot as plt
 from PIL import Image
+from io import BytesIO
 
-
+#@app.route('/getPMTData', methods=['GET']) 
 def getPMTData():
     
     dataArray = []
 
-    now = datetime.datetime.now()
-    dt = datetime.datetime.now() - datetime.timedelta(hours = 8)
-
-    r = requests.get("http://192.168.1.74:5000/getPMTDataByDate", params={'start': dt, 'end': now})
+    r = requests.get("http://192.168.1.74:5000/getPMTData")
 
     if (r.status_code == 200):
 
         print("getPMTData: request was successful!\n")
         resp = r.json()
 
-        for x in resp:
-           dataArray.append(json.loads(x))
-
-        x = []
-        y = []
-        for i in dataArray:
-            y.append(i['pm25'])
-            val = i['ts']            
-            x.append(datetime.datetime.strptime(val, '%Y-%m-%d %H:%M:%S'))
-
-
-        plt.title('PMT Data')
-        plt.ylabel('Y axis')
-        plt.xlabel('X axis')
-        plt.plot(x, y, 'b', label='PM 25', linewidth=2)
-        #plt.grid(False,color='k')
-        plt.show()
+        print("getPMTData: data returned is {}\n".format(resp))
+        return resp
 
     else:
-        print("main: Request Failed! status code {}".format(r.status_code))
+        print("getPMTData: Request Failed! status code {}".format(r.status_code))
 
 
-def getPMTPlotData():
+def getPMTDataByDate():
     
     dataArray = []
 
-    now = datetime.datetime.now()
-    dt = datetime.datetime.now() - datetime.timedelta(hours = 8)
+    end = datetime.datetime.now() - datetime.timedelta(hours = 24)
+    start = end - datetime.timedelta(hours = 8)
 
-    r = requests.get("http://192.168.1.74:5000/getPMTPlotByDate", params={'start': dt, 'end': now})
+    print("getPMTDataByDate: start {} and end {} dates: \n".format(start, end)) 
 
-    print("response is: {}\n".format(r))
+    r = requests.get("http://192.168.1.74:5000/getPMTDataByDate", params={'start': start, 'end': end})
+
+    if (r.status_code == 200):
+
+        print("getPMTDataByDate: request was successful!\n")
+        resp = r.json()
+
+        for x in resp:
+            print("x is {}\n".format(x))
+        #return resp
+
+    else:
+        print("getPMTDataByDate: Request Failed! status code {}".format(r.status_code))
+
+       
+def getPMTPlotByDate():
+    
+    dataArray = []
+
+    # end = datetime.datetime.now() - datetime.timedelta(hours = 24)
+    # start = end - datetime.timedelta(hours = 8)
+    end = datetime.datetime.now()
+    start = end - datetime.timedelta(hours = 8)
+
+    r = requests.get("http://192.168.1.74:5000/getPMTPlotByDate", params={'start': start, 'end': end})
 
     if (r.status_code == 200):
 
         print("getPMTPlotData: request was successful!\n")
-
+        img = Image.open(BytesIO(r.content)) 
+        img.show()
 
     else:
-        print("main: Request Failed! status code {}".format(r.status_code))
+        print("getPMTPlotData: Request Failed! status code {}".format(r.status_code))
 
 
 def main():
     
     #getPMTData()
-    getPMTPlotData()
+    #getPMTDataByDate()
+    getPMTPlotByDate()
 
 if __name__ == "__main__":
     main()
