@@ -70,7 +70,7 @@ def getPMTPlotByDate():
     # end = datetime.datetime.now() - datetime.timedelta(hours = 24)
     # start = end - datetime.timedelta(hours = 8)
     end = datetime.datetime.now()
-    start = end - datetime.timedelta(hours = 8)
+    start = end - datetime.timedelta(hours = 24)
 
     r = requests.get("http://192.168.1.74:5000/getPMTPlotByDate", params={'start': start, 'end': end})
 
